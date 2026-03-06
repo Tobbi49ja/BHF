@@ -15,18 +15,20 @@ const stepLabels = {
   ar: [{ title: "ملف المستفيد", desc: "التفاصيل الشخصية والتواصل" }, { title: "الفحص الصحي", desc: "ضغط الدم، السكر، ومؤشر كتلة الجسم" }],
 };
 
-const langLabels = { en: "Language", ha: "Harshe", yo: "Èdè", ig: "Asụsụ", fr: "Langue", ar: "اللغة" };
+const langLabels   = { en: "Language", ha: "Harshe", yo: "Èdè", ig: "Asụsụ", fr: "Langue", ar: "اللغة" };
 const secureLabels = { en: "Secure & encrypted", ha: "Tsaro & sirri", yo: "Aabo & fifi pamọ", ig: "Nchekwa & ezipụta", fr: "Sécurisé & chiffré", ar: "آمن ومشفر" };
+const homeLabels   = { en: "Back to Home", ha: "Gida", yo: "Ile", ig: "Ulo", fr: "Accueil", ar: "الرئيسية" };
 
-function Sidebar({ currentStep, setCurrentStep, lang, setLang, sidebarOpen, setSidebarOpen, onBackToHome }) {
+function Dashboard({ currentStep, setCurrentStep, lang, setLang, dashboardOpen, setDashboardOpen, onBackToHome }) {
   const steps = stepLabels[lang] || stepLabels.en;
   const isRTL = lang === "ar";
 
   return (
-    <aside className={`sidebar${sidebarOpen ? " open" : ""}`} dir={isRTL ? "rtl" : "ltr"}>
-      <button className="sidebar-close" onClick={() => setSidebarOpen(false)}>
+    <aside className={`dashboard${dashboardOpen ? " open" : ""}`} dir={isRTL ? "rtl" : "ltr"}>
+      <button className="dashboard-close" onClick={() => setDashboardOpen(false)}>
         <Icon name="x" size={18} />
       </button>
+
       <div className="logo">
         <Icon name="shield-plus" size={22} className="logo-icon" />
         <span>BHF</span>
@@ -35,11 +37,16 @@ function Sidebar({ currentStep, setCurrentStep, lang, setLang, sidebarOpen, setS
         <p>Beyond Health Foundation</p>
         <span className="app-name">DataGuardian</span>
       </div>
+
       <div className="progress-steps">
         {steps.map((step, index) => {
           const stepNumber = index + 1;
           return (
-            <div key={stepNumber} className={`step${currentStep === stepNumber ? " active" : ""}${currentStep > stepNumber ? " completed" : ""}`} data-step={stepNumber} onClick={() => setCurrentStep(stepNumber)}>
+            <div
+              key={stepNumber}
+              className={`step${currentStep === stepNumber ? " active" : ""}${currentStep > stepNumber ? " completed" : ""}`}
+              onClick={() => setCurrentStep(stepNumber)}
+            >
               <div className="step-number">
                 {currentStep > stepNumber ? <Icon name="check" size={14} /> : stepNumber}
               </div>
@@ -51,6 +58,7 @@ function Sidebar({ currentStep, setCurrentStep, lang, setLang, sidebarOpen, setS
           );
         })}
       </div>
+
       <div className="lang-toggle">
         <p className="lang-label">
           <Icon name="globe" size={12} style={{ display: "inline", marginRight: 4 }} />
@@ -63,11 +71,13 @@ function Sidebar({ currentStep, setCurrentStep, lang, setLang, sidebarOpen, setS
           </select>
         </div>
       </div>
-      <button className="sidebar-home-btn" onClick={onBackToHome}>
+
+      <button className="dashboard-home-btn" onClick={onBackToHome}>
         <Icon name="house" size={15} />
-        {lang === "ar" ? "الرئيسية" : lang === "fr" ? "Accueil" : lang === "ha" ? "Gida" : lang === "yo" ? "Ile" : lang === "ig" ? "Ulo" : "Back to Home"}
+        {homeLabels[lang] || homeLabels.en}
       </button>
-      <div className="sidebar-footer">
+
+      <div className="dashboard-footer">
         <p>{secureLabels[lang] || secureLabels.en}</p>
         <div className="security-badges">
           <Icon name="shield-check" size={16} className="badge-icon" />
@@ -78,4 +88,4 @@ function Sidebar({ currentStep, setCurrentStep, lang, setLang, sidebarOpen, setS
   );
 }
 
-export default Sidebar;
+export default Dashboard;

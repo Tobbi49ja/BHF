@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import LandingPage    from "./components/LandingPage";
 import LoginPage      from "./components/LoginPage";
-import Sidebar        from "./components/Sidebar";
+import Dashboard      from "./components/Dashboard";
 import Step1          from "./components/Step1";
 import Step2          from "./components/Step2";
 import Success        from "./components/Success";
@@ -13,7 +13,7 @@ import { useAuth }    from "./context/AuthContext";
 import { submitRecord } from "./services/api";
 import "./App.css";
 
-// ── Protected route wrapper ───────────────────────────────────
+// ── Protected route wrappers ──────────────────────────────────
 function RequireAuth({ children }) {
   const { user, ready } = useAuth();
   if (!ready) return null;
@@ -28,7 +28,7 @@ function RequireAdmin({ children }) {
   return children;
 }
 
-// ── i18n ─────────────────────────────────────────────────────
+// ── i18n ──────────────────────────────────────────────────────
 const headerText = {
   en: { badge: "DataGuardian", title: "Beneficiary Intake Form", sub: "Beyond Health Foundation — Secure, encrypted data collection for community health programs." },
   ha: { badge: "DataGuardian", title: "Fom na Amfanin Masu Amfani", sub: "Gidauniyar Lafiya ta BHF — Tattara bayanai lafiya da sirri." },
@@ -39,12 +39,12 @@ const headerText = {
 };
 
 const navText = {
-  en: { next: "Next Step",        prev: "Previous",   submit: "Submit Record",    home: "Home",     logout: "Logout" },
-  ha: { next: "Mataki na Gaba",   prev: "Baya",        submit: "Aika Bayani",      home: "Gida",     logout: "Fita" },
-  yo: { next: "Igbesẹ Ti o Tẹle", prev: "Iṣaaju",     submit: "Firanṣẹ Igbasilẹ", home: "Ile",      logout: "Jade" },
-  ig: { next: "Nzọụkwụ Ọzọ",      prev: "Nazaghachi",  submit: "Zipu Ndekọ",       home: "Ulo",      logout: "Pụọ" },
-  fr: { next: "Étape Suivante",    prev: "Précédent",   submit: "Soumettre",        home: "Accueil",  logout: "Déconnexion" },
-  ar: { next: "الخطوة التالية",    prev: "السابق",      submit: "إرسال السجل",      home: "الرئيسية", logout: "خروج" },
+  en: { next: "Next Step",        prev: "Previous",    submit: "Submit Record",    home: "Home",      logout: "Logout" },
+  ha: { next: "Mataki na Gaba",   prev: "Baya",         submit: "Aika Bayani",      home: "Gida",      logout: "Fita" },
+  yo: { next: "Igbesẹ Ti o Tẹle", prev: "Iṣaaju",      submit: "Firanṣẹ Igbasilẹ", home: "Ile",       logout: "Jade" },
+  ig: { next: "Nzọụkwụ Ọzọ",      prev: "Nazaghachi",   submit: "Zipu Ndekọ",       home: "Ulo",       logout: "Pụọ" },
+  fr: { next: "Étape Suivante",    prev: "Précédent",    submit: "Soumettre",        home: "Accueil",   logout: "Déconnexion" },
+  ar: { next: "الخطوة التالية",    prev: "السابق",       submit: "إرسال السجل",      home: "الرئيسية",  logout: "خروج" },
 };
 
 const emptyForm = {
@@ -57,21 +57,21 @@ const emptyForm = {
 // ── Form page (Step 1 + 2) ────────────────────────────────────
 function FormPage({ lang, setLang }) {
   const { user, logout } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [conditions,  setConditions]  = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [formData,    setFormData]    = useState(emptyForm);
-  const [submitting,  setSubmitting]  = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const [done,        setDone]        = useState(false);
+  const [currentStep,   setCurrentStep]   = useState(1);
+  const [conditions,    setConditions]    = useState([]);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [formData,      setFormData]      = useState(emptyForm);
+  const [submitting,    setSubmitting]    = useState(false);
+  const [submitError,   setSubmitError]   = useState("");
+  const [done,          setDone]          = useState(false);
 
   const h     = headerText[lang] || headerText.en;
   const n     = navText[lang]    || navText.en;
   const isRTL = lang === "ar";
 
   const handleLogout = () => { logout(); window.location.href = "/"; };
-  const nextStep = () => { setCurrentStep(2); setSidebarOpen(false); };
-  const prevStep = () => { setCurrentStep(1); setSidebarOpen(false); };
+  const nextStep     = () => { setCurrentStep(2); setDashboardOpen(false); };
+  const prevStep     = () => { setCurrentStep(1); setDashboardOpen(false); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -107,23 +107,23 @@ function FormPage({ lang, setLang }) {
 
   return (
     <div className="container" dir={isRTL ? "rtl" : "ltr"}>
-      {sidebarOpen && (
-        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      {dashboardOpen && (
+        <div className="dashboard-overlay" onClick={() => setDashboardOpen(false)} />
       )}
 
-      <Sidebar
+      <Dashboard
         currentStep={currentStep}
-        setCurrentStep={(s) => { setCurrentStep(s); setSidebarOpen(false); }}
+        setCurrentStep={(s) => { setCurrentStep(s); setDashboardOpen(false); }}
         lang={lang}
         setLang={setLang}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
+        dashboardOpen={dashboardOpen}
+        setDashboardOpen={setDashboardOpen}
         onBackToHome={() => { window.location.href = "/"; }}
       />
 
       <main className="main-content">
         <div className="mobile-topbar">
-          <button className="hamburger" onClick={() => setSidebarOpen(true)}>
+          <button className="hamburger" onClick={() => setDashboardOpen(true)}>
             <Icon name="menu" size={20} />
           </button>
           <span className="mobile-brand">
@@ -220,22 +220,24 @@ export default function App() {
   return (
     <Routes>
       {/* Public */}
-      <Route path="/" element={<LandingPage
-        onStart={() => {
-          if (!user) window.location.href = "/login";
-          else if (user.role === "Administrator") window.location.href = "/admin";
-          else window.location.href = "/form";
-        }}
-        lang={lang}
-        setLang={setLang}
-      />} />
+      <Route path="/" element={
+        <LandingPage
+          onStart={() => {
+            if (!user) window.location.href = "/login";
+            else if (user.role === "Administrator") window.location.href = "/admin";
+            else window.location.href = "/dashboard";
+          }}
+          lang={lang}
+          setLang={setLang}
+        />
+      } />
 
       <Route path="/login" element={
         user
-          ? <Navigate to={user.role === "Administrator" ? "/admin" : "/form"} replace />
+          ? <Navigate to={user.role === "Administrator" ? "/admin" : "/dashboard"} replace />
           : <LoginPage
               onSuccess={(data) => {
-                window.location.href = data.role === "Administrator" ? "/admin" : "/form";
+                window.location.href = data.role === "Administrator" ? "/admin" : "/dashboard";
               }}
               onBack={() => { window.location.href = "/"; }}
               lang={lang}
@@ -243,7 +245,7 @@ export default function App() {
       } />
 
       {/* Protected: logged-in users */}
-      <Route path="/form" element={
+      <Route path="/dashboard" element={
         <RequireAuth>
           <FormPage lang={lang} setLang={setLang} />
         </RequireAuth>
@@ -256,8 +258,10 @@ export default function App() {
         </RequireAdmin>
       } />
 
-      {/* 404 — catches everything else like /hi, /abc, etc */}
-      <Route path="*" element={<NotFound onBack={() => { window.location.href = "/"; }} />} />
+      {/* 404 — catches everything else */}
+      <Route path="*" element={
+        <NotFound onBack={() => { window.location.href = "/"; }} />
+      } />
     </Routes>
   );
 }

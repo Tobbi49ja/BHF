@@ -49,7 +49,7 @@ export default function LoginPage({ onSuccess, onBack, lang = "en" }) {
           </div>
         </div>
 
-        {/* Mode tabs */} 
+      
         <div className="auth-mode-tabs">
           <button className={`auth-mode-tab${mode === "login" ? " active" : ""}`} onClick={() => { setMode("login"); setError(""); }}>
             <Icon name="lock" size={13} /> Sign In

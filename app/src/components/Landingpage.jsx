@@ -286,7 +286,7 @@ function LandingPage({ onStart, lang, setLang }) {
         </div>
       </nav>
 
-      {/* ── HERO ── */}
+
       <section className="landing-hero">
         <div className="hero-bg-grid"></div>
         <div className="hero-bg-glow"></div>
@@ -295,12 +295,12 @@ function LandingPage({ onStart, lang, setLang }) {
         <div className="hero-visual"><AnimatedHeroCard /></div>
       </section>
 
-      {/* ── STATS ── */}
+    
       <section className="landing-stats">
         {t.stats.map((s, i) => <StatItem key={i} value={s.value} label={s.label} delay={i * 120} />)}
       </section>
 
-      {/* ── FEATURES ── */}
+      
       <section className="landing-features" id="features">
         <div className="section-header">
           <div className="section-tag">Features</div>
@@ -312,7 +312,7 @@ function LandingPage({ onStart, lang, setLang }) {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
+
       <section className="landing-how" id="how">
         <div className="section-header">
           <div className="section-tag">Process</div>
@@ -325,7 +325,6 @@ function LandingPage({ onStart, lang, setLang }) {
         </div>
       </section>
 
-      {/* ── CTA BANNER ── */}
       <section className="landing-cta-banner" id="security">
         <div className="cta-banner-inner">
           <div className="cta-banner-icons">
@@ -340,7 +339,7 @@ function LandingPage({ onStart, lang, setLang }) {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
+   
       <footer className="landing-footer">
         <div className="landing-footer-inner">
           <div className="landing-logo">
