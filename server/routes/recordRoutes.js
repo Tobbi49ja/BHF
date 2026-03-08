@@ -1,13 +1,8 @@
-// routes/recordRoutes.js
 import express from "express";
-import { recordSchema } from "../models/Record.js";
 import { createAuthMiddleware } from "../middleware/authMiddleware.js";
 
-export function createRecordRouter(atlasConn, localConn) {
-  const { protect } = createAuthMiddleware(atlasConn);  // ← get middleware from connection
-  const AtlasRecord = atlasConn.model("Record", recordSchema);
-  const LocalRecord = localConn ? localConn.model("Record", recordSchema) : null;
-
+export function createRecordRouter(AtlasRecord, LocalRecord, atlasConn) {
+  const { protect } = createAuthMiddleware(atlasConn);
   const router = express.Router();
 
   router.post("/", protect, async (req, res) => {
@@ -21,7 +16,9 @@ export function createRecordRouter(atlasConn, localConn) {
       }
       res.status(201).json({ message: "Record saved", record });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error("Record save error:", error.message);
+      const status = error.name === "ValidationError" ? 400 : 500;
+      res.status(status).json({ message: error.message });
     }
   });
 

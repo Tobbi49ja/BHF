@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
-import LandingPage    from "./components/LandingPage";
+import LandingPage    from "./components/Home";
 import LoginPage      from "./components/LoginPage";
 import Dashboard      from "./components/Dashboard";
 import Step1          from "./components/Step1";
@@ -258,7 +258,6 @@ export default function App() {
         </RequireAdmin>
       } />
 
-      {/* 404 — catches everything else */}
       <Route path="*" element={
         <NotFound onBack={() => { window.location.href = "/"; }} />
       } />

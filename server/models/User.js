@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema(
       enum: ["Field Volunteer", "Health Worker", "Program Manager", "Data Analyst", "Administrator"],
       default: "Field Volunteer",
     },
+    status:       { type: String, enum: ["active", "idle", "offline"], default: "offline" },
+    lastSeen:     { type: Date, default: Date.now },
+    cookieConsent: { type: Boolean, default: null },
   },
   { timestamps: true }
 );

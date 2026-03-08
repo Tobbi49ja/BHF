@@ -1,18 +1,13 @@
-// routes/adminRoutes.js
 import express from "express";
 import ExcelJS from "exceljs";
-import userSchema from "../models/User.js";
-import { recordSchema } from "../models/Record.js";
 import { createAuthMiddleware } from "../middleware/authMiddleware.js";
 
-export function createAdminRouter(atlasConn) {
-  const { protect, adminOnly } = createAuthMiddleware(atlasConn);  // ← from connection
-  const User = atlasConn.model("User", userSchema);
-  const AtlasRecord = atlasConn.model("Record", recordSchema);
-
+export function createAdminRouter(AtlasRecord, User, atlasConn) {
+  const { protect, adminOnly } = createAuthMiddleware(atlasConn);
   const router = express.Router();
   router.use(protect, adminOnly);
 
+  // ── Users ────────────────────────────────────────────────
   router.get("/users", async (req, res) => {
     const users = await User.find().select("-password").sort({ createdAt: -1 });
     res.json(users);
@@ -33,6 +28,45 @@ export function createAdminRouter(atlasConn) {
     res.json({ message: "Role updated", user });
   });
 
+  router.get("/users/export", async (req, res) => {
+    try {
+      const users = await User.find().select("-password").sort({ createdAt: -1 });
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet("Registered Users");
+
+      sheet.columns = [
+        { header: "Full Name", key: "fullName", width: 22 },
+        { header: "Email",     key: "email",    width: 28 },
+        { header: "Role",      key: "role",     width: 20 },
+        { header: "Status",    key: "status",   width: 12 },
+        { header: "Last Seen", key: "lastSeen", width: 22 },
+        { header: "Joined",    key: "createdAt",width: 22 },
+      ];
+
+      const headerRow = sheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF2563EB" } };
+      headerRow.height = 22;
+
+      users.forEach((u) => sheet.addRow({
+        fullName:  u.fullName,
+        email:     u.email,
+        role:      u.role,
+        status:    u.status || "offline",
+        lastSeen:  u.lastSeen ? new Date(u.lastSeen).toLocaleString() : "—",
+        createdAt: new Date(u.createdAt).toLocaleString(),
+      }));
+
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename="BHF_Users_${Date.now()}.xlsx"`);
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // ── Records ──────────────────────────────────────────────
   router.get("/records", async (req, res) => {
     try {
       const records = await AtlasRecord.find()
@@ -59,7 +93,15 @@ export function createAdminRouter(atlasConn) {
         { header: "Gender",       key: "gender",                 width: 12 },
         { header: "Age",          key: "age",                    width: 8  },
         { header: "Phone",        key: "phone",                  width: 18 },
-        { header: "Address",      key: "address",                width: 28 },
+        { header: "Street",       key: "street",                 width: 24 },
+        { header: "Street 2",     key: "street2",                width: 24 },
+        { header: "Town/Area",    key: "town",                   width: 18 },
+        { header: "City",         key: "city",                   width: 16 },
+        { header: "LGA",          key: "lga",                    width: 16 },
+        { header: "State",        key: "state",                  width: 16 },
+        { header: "Postal Code",  key: "postcode",               width: 14 },
+        { header: "Landmark",     key: "landmark",               width: 24 },
+        { header: "Full Address", key: "address",                width: 40 },
         { header: "Volunteer",    key: "volunteerName",          width: 20 },
         { header: "BP Systolic",  key: "bloodPressureSystolic",  width: 12 },
         { header: "BP Diastolic", key: "bloodPressureDiastolic", width: 12 },
@@ -77,21 +119,32 @@ export function createAdminRouter(atlasConn) {
       headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF10B981" } };
       headerRow.height = 22;
 
-      records.forEach((r) => {
-        sheet.addRow({
-          firstName: r.firstName,               lastName: r.lastName,
-          gender: r.gender,                     age: r.age,
-          phone: r.phone,                       address: r.address,
-          volunteerName: r.volunteerName,
-          bloodPressureSystolic: r.bloodPressureSystolic,
-          bloodPressureDiastolic: r.bloodPressureDiastolic,
-          bloodSugar: r.bloodSugar,             weight: r.weight,
-          height: r.height,                     bmi: r.bmi,
-          conditions: (r.conditions || []).join(", "),
-          submittedByName: r.submittedBy?.fullName || "—",
-          submittedAt: r.submittedAt ? new Date(r.submittedAt).toLocaleString() : "—",
-        });
-      });
+      records.forEach((r) => sheet.addRow({
+        firstName:              r.firstName,
+        lastName:               r.lastName,
+        gender:                 r.gender,
+        age:                    r.age,
+        phone:                  r.phone,
+        street:                 r.address?.street    || "—",
+        street2:                r.address?.street2   || "—",
+        town:                   r.address?.town      || "—",
+        city:                   r.address?.city      || "—",
+        lga:                    r.address?.lga       || "—",
+        state:                  r.address?.state     || "—",
+        postcode:               r.address?.postcode  || "—",
+        landmark:               r.address?.landmark  || "—",
+        address:                r.address?.full      || "—",
+        volunteerName:          r.volunteerName,
+        bloodPressureSystolic:  r.bloodPressureSystolic,
+        bloodPressureDiastolic: r.bloodPressureDiastolic,
+        bloodSugar:             r.bloodSugar,
+        weight:                 r.weight,
+        height:                 r.height,
+        bmi:                    r.bmi,
+        conditions:             (r.conditions || []).join(", "),
+        submittedByName:        r.submittedBy?.fullName || "—",
+        submittedAt:            r.submittedAt ? new Date(r.submittedAt).toLocaleString() : "—",
+      }));
 
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="BHF_Records_${Date.now()}.xlsx"`);
